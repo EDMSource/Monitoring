@@ -1,0 +1,21 @@
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Папки с результатами сборки 
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bin/
+obj/
+
+__pycache__/
+*.pyc
+
+# Логи и базы данных
+*.log
+*.db
+*.opendb
