@@ -34,7 +34,7 @@ int getCpu() {
     auto ft = [](FILETIME f) { return((unsigned __int64)f.dwLowDateTime | ((unsigned __int64)f.dwHighDateTime << 32));
  };
 	unsigned __int64 idle = ft(i2) - ft(i1);
-	unsigned __int64 total = idle + (ft(k2) - ft(k1)) + (ft(u2) - ft(u1));
+	unsigned __int64 total = (ft(k2) - ft(k1)) + (ft(u2) - ft(u1));
 	return (total == 0) ? 0 : (int)((total - idle) * 100 / total);
 }
 
