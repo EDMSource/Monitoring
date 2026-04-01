@@ -9,7 +9,7 @@ import subprocess
 import json
 from flask import Flask, jsonify, request
 
-project = r"Clear"
+project = r"C:\Users\Сергей Невелев\Documents\GitHub\Monitoring\mag"
 monitor_path = os.path.join(project, "monitor.exe")
 
 app = Flask(__name__)
@@ -20,7 +20,7 @@ def get_monitor_output():
             [monitor_path],
             capture_output=True,
             text=True,
-            encoding='utf-8',
+            encoding='cp1251',
             timeout=2
         )
         if result.returncode == 0:
