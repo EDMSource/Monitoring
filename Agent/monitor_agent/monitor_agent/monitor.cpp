@@ -5,7 +5,7 @@
 #include <vector>
 
 using namespace std;
-
+// Func for Memory
 int getRamUsage() {
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status); 
@@ -15,7 +15,7 @@ int getRamUsage() {
     }
     return 0;
 }
-
+// Func for Disk
 int getDiskLoad() {
     ULARGE_INTEGER freeBytesAvailable, totalBytes, totalFreeBytes;
     
@@ -25,6 +25,7 @@ int getDiskLoad() {
     }
     return 0;
 }
+// Func for Cpu
 int getCpu() {
 
     FILETIME i1, k1, u1, i2, k2, u2;
@@ -38,6 +39,32 @@ int getCpu() {
 	return (total == 0) ? 0 : (int)((total - idle) * 100 / total);
 }
 
+// Func for processes
+void GetProcs() {
+    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnap == INVALID_HANDLE_VALUE) {
+        cout << "[]";
+        return;
+    }
+
+    PROCESSENTRY32W pe; 
+    pe.dwSize = sizeof(pe);
+
+    cout << "["; 
+    if (Process32FirstW(hSnap, &pe)) {
+        bool first = true;
+        do {
+            if (!first) cout << ",";
+            printf("{\"pid\":%d,\"name\":\"%ls\"}", pe.th32ProcessID, pe.szExeFile);
+
+            first = false;
+        } while (Process32NextW(hSnap, &pe));
+    }
+    cout << "]";
+
+    CloseHandle(hSnap);
+}
+
 
 int main() {
     SetConsoleCP(1251);
@@ -47,10 +74,12 @@ int main() {
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     GlobalMemoryStatusEx(&status);
-
+    // only json
     cout << "{"
-        << "\"cpu\":" << getCpu() << ","
-        << "\"ram\":" << status.dwMemoryLoad << ","
-        << "\"disk\":" << getDiskLoad()
-        << "}" << endl;
+         << "\"cpu\":" << getCpu() << ","
+         << "\"ram\":" << status.dwMemoryLoad << ","
+         << "\"disk\":" << getDiskLoad()
+         << ",\"processes\":";
+         GetProcs(); // call func
+    cout << "}" << endl;
 }
