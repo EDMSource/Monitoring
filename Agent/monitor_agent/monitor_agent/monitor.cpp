@@ -17,10 +17,9 @@ int getRamUsage() {
 }
 
 int main() {
-    setlocale(LC_ALL, "Russian");
 
-    cout << "Запуск" << endl;
-    cout << "Загрузка RAM - " << getRamUsage() << "%" << endl;
+
+    cout << "RAM - " << getRamUsage() << "%" << endl;
 
     return 0;
 }
