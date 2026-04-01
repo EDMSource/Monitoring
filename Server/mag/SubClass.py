@@ -9,8 +9,8 @@ import subprocess
 import json
 from flask import Flask, jsonify, request
 
-project = r"Clear"
-monitor_path = os.path.join(project, "monitor.exe")
+project = os.path.dirname(os.path.abspath(__file__))
+monitor_path = os.path.join(project, "..", "..", "Agent", "monitor_agent", "x64", "Debug", "monitor_agent.exe")
 
 app = Flask(__name__)
 
