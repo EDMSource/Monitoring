@@ -1,7 +1,26 @@
+#include <windows.h> 
+#include <tlhelp32.h> 
 #include <iostream>
+#include <string>
+#include <vector>
+
 using namespace std;
 
-int main() { 
-	cout << "{\"ram\": 50}" << endl;
-	return 0;
+int getRamUsage() {
+    MEMORYSTATUSEX status;
+    status.dwLength = sizeof(status); 
+
+    if (GlobalMemoryStatusEx(&status)) {
+        return (int)status.dwMemoryLoad; 
+    }
+    return 0;
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    cout << "Запуск" << endl;
+    cout << "Загрузка RAM - " << getRamUsage() << "%" << endl;
+
+    return 0;
 }
