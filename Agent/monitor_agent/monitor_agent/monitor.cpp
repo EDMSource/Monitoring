@@ -40,7 +40,17 @@ int getCpu() {
 
 
 int main() {
-	cout << "Disk c -" << getDiskLoad() << "%" << endl;
-    cout << "RAM - " << getRamUsage() << "%" << endl;
-	cout << "CPU - " << getCpu() << "%" << endl;
+    SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+
+    MEMORYSTATUSEX status;
+    status.dwLength = sizeof(status);
+    GlobalMemoryStatusEx(&status);
+
+    cout << "{"
+        << "\"cpu\":" << getCpu() << ","
+        << "\"ram\":" << status.dwMemoryLoad << ","
+        << "\"disk\":" << getDiskLoad()
+        << "}" << endl;
 }
