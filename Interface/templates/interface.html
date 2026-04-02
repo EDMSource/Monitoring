@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>System Monitor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #fff;
+            padding: 40px;
+        }
+
+        .dashboard {
+            display: flex;
+            border-left: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .box {
+            padding: 0 20px;
+            border-right: 1px solid #ddd;
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .val {
+            font-size: 28px;
+            color: #0067c0;
+            display: block;
+            font-weight: 300;
+        }
+
+        .label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="box"><span class="val" id="cpu">0%</span><span class="label">ЦП</span></div>
+        <div class="box"><span class="val" id="ram">0%</span><span class="label">Память</span></div>
+        <div class="box"><span class="val" id="disk">0%</span><span class="label">Диск</span></div>
+    </div>
+
+    <h3>Активные процессы</h3>
+    <table id="procTable">
+        <thead><tr><th>PID</th><th>Имя процесса</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function refresh() {
+            try {
+
+                const response = await fetch('http://localhost:5000/api/metrics');
+                const data = await response.json();
+
+                document.getElementById('cpu').innerText = data.cpu + "%";
+                document.getElementById('ram').innerText = data.ram + "%";
+                document.getElementById('disk').innerText = data.disk + "%";
+
+                const tbody = document.querySelector('#procTable tbody');
+                tbody.innerHTML = data.procs.slice(0, 30).map(p => `
+                    <tr><td>${p.pid}</td><td>${p.name}</td></tr>
+                `).join('');
+            } catch (e) { console.log("Ошибка обновления данных"); }
+        }
+        setInterval(refresh, 2000);
+    </script>
+</body>
+</html>
