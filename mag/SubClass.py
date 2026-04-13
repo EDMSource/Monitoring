@@ -4,6 +4,8 @@
 
 # http://localhost:5000/api/metrics
 
+# http://localhost:5000
+
 # http://localhost:5000/api/kill/<pid>
 
 
@@ -32,7 +34,7 @@ def get_monitor_output():
             [monitor_path], 
             capture_output=True,
             text=True,
-            encoding='utf-8',
+            encoding='cp1251',
             timeout=2
         )
         if result.returncode == 0:
@@ -75,12 +77,14 @@ def index():
 @app.route('/api/metrics')
 def metrics():
     mon = get_monitor_output()
-    procs = get_processes()
+    print("DEBUG from C++:", mon)
+    procs = mon.get("processes", get_processes())
     response = {
         "cpu": mon.get("cpu", "0%"),
         "ram": mon.get("ram", "0%"),
         "disk": mon.get("disk", "0%"),
-        "procs": procs[:30]
+        "procs": procs[:200] # Сколько процессов вывести (и 
+                             # изменить в interface.html ~80 строку тоже на число которое нужно для вывода)
     }
     return jsonify(response)
 
