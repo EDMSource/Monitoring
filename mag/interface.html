@@ -11,6 +11,7 @@
             font-family: 'Segoe UI', sans-serif;
             background: #fff;
             padding: 40px;
+            transition: 0.3s; /* Чтобы тема менялась плавно */
         }
 
         .dashboard {
@@ -24,6 +25,25 @@
             border-right: 1px solid #ddd;
             text-align: right;
             min-width: 100px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .bar-container {
+            width: 4px;
+            height: 40px;
+            background: #eee;
+            position: relative;
+        }
+
+        .bar-fill {
+            width: 100%;
+            height: 0%; 
+            background: #0067c0; 
+            position: absolute;
+            bottom: 0;
+            transition: height 0.5s;
         }
 
         .val {
@@ -50,6 +70,7 @@
             border-bottom: 1px solid #eee;
             font-size: 13px;
         }
+
         .kill-btn {
             background-color: #e81123;
             color: white;
@@ -67,9 +88,34 @@
 </head>
 <body>
     <div class="dashboard">
-        <div class="box"><span class="val" id="cpu">0%</span><span class="label">ЦП</span></div>
-        <div class="box"><span class="val" id="ram">0%</span><span class="label">Память</span></div>
-        <div class="box"><span class="val" id="disk">0%</span><span class="label">Диск</span></div>
+        <div class="box">
+            <div class="bar-container">
+                <div id="cpu-bar" class="bar-fill"></div>
+            </div>
+            <div>
+                <span class="val" id="cpu">0%</span>
+                <span class="label">ЦП</span>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="bar-container">
+                <div id="ram-bar" class="bar-fill"></div>
+            </div>
+            <div>
+                <span class="val" id="ram">0%</span>
+                <span class="label">Память</span>
+            </div>
+        </div>
+        <div class="box">
+            <div class="bar-container">
+                <div id="disk-bar" class="bar-fill"></div>
+            </div>
+            <div>
+                <span class="val" id="disk">0%</span>
+                <span class="label">Диск</span>
+            </div>
+        </div>
     </div>
 
     <h3>Активные процессы</h3>
@@ -91,20 +137,20 @@
                 document.getElementById('cpu').innerText = data.cpu + "%";
                 document.getElementById('ram').innerText = data.ram + "%";
                 document.getElementById('disk').innerText = data.disk + "%";
+                document.getElementById('cpu-bar').style.height = data.cpu + "%";
+                document.getElementById('ram-bar').style.height = data.ram + "%";
+                document.getElementById('disk-bar').style.height = data.disk + "%";
+
 
                 const tbody = document.querySelector('#procTable tbody');
                 tbody.innerHTML = data.procs.slice(0, 200).map(p => `
-                    <tr>
-                        <td>${p.pid}</td>
-                        <td>${p.name}</td>
-                        <td>
-                            <button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">
-                                Завершить
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-                ;
+                <tr>
+                    <td>${p.pid}</td>
+                    <td>${p.name}</td>
+                    <td><button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">Завершить</button></td>
+                </tr>
+            `).join('');
+
             } catch (e) { console.log("Ошибка обновления данных"); }
         }
         setInterval(refresh, 2000);
@@ -123,7 +169,7 @@
             } catch (e) { alert("Ошибка соединения с сервером."); }
         }
         function changeTheme() {
-            // Если сейчас фон белый или не задан — делаем темным
+            // Если сейчас фон белый или не задан - делаем темным
             if (document.body.style.backgroundColor === "" || document.body.style.backgroundColor === "white") {
                 document.body.style.backgroundColor = "#222"; // Темный фон
                 document.body.style.color = "white";         // Белый текст
@@ -133,6 +179,15 @@
                 document.body.style.color = "black";
             }
         }
+        // Внутри refresh() после получения данных:
+        document.getElementById('cpu').innerText = data.cpu + "%";
+        document.getElementById('cpu-bar').style.height = data.cpu + "%";
+
+        document.getElementById('ram').innerText = data.ram + "%";
+        document.getElementById('ram-bar').style.height = data.ram + "%";
+
+        document.getElementById('disk').innerText = data.disk + "%";
+        document.getElementById('disk-bar').style.height = data.disk + "%";
 
     </script>
 </body>
