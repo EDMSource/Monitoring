@@ -50,6 +50,19 @@
             border-bottom: 1px solid #eee;
             font-size: 13px;
         }
+        .kill-btn {
+            background-color: #e81123;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+            .kill-btn:hover {
+                background-color: #b00d1b;
+            }
     </style>
 </head>
 <body>
@@ -61,7 +74,7 @@
 
     <h3>Активные процессы</h3>
     <table id="procTable">
-        <thead><tr><th>PID</th><th>Имя процесса</th></tr></thead>
+        <thead><tr><th>PID</th><th>Имя процесса</th><th>Действие</th></tr></thead>
         <tbody></tbody>
     </table>
 
@@ -78,11 +91,34 @@
 
                 const tbody = document.querySelector('#procTable tbody');
                 tbody.innerHTML = data.procs.slice(0, 200).map(p => `
-                    <tr><td>${p.pid}</td><td>${p.name}</td></tr>
-                `).join('');
+                <tr>
+                    <td>${p.pid}</td>
+                    <td>${p.name}</td>
+                    <td>
+                        <button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">
+                            Завершить
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+;
             } catch (e) { console.log("Ошибка обновления данных"); }
         }
         setInterval(refresh, 2000);
+        async function killProcess(pid, name) {
+            if (!confirm(`Вы точно хотите завершить процесс ${name} (PID: ${pid})?`)) return;
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/kill/${pid}`, { method: 'POST' });
+                const result = await response.json();
+
+                if (result.status === 'ok') {
+                    refresh(); // обновляем таблицу сразу
+                } else {
+                    alert("Ошибка: " + result.message);
+                }
+            } catch (e) { alert("Ошибка соединения с сервером."); }
+        }
     </script>
 </body>
 </html>
