@@ -73,6 +73,9 @@
     </div>
 
     <h3>Активные процессы</h3>
+    <button onclick="changeTheme()" style="margin-bottom: 10px; cursor: pointer;">
+        Сменить тему
+    </button>
     <table id="procTable">
         <thead><tr><th>PID</th><th>Имя процесса</th><th>Действие</th></tr></thead>
         <tbody></tbody>
@@ -91,17 +94,17 @@
 
                 const tbody = document.querySelector('#procTable tbody');
                 tbody.innerHTML = data.procs.slice(0, 200).map(p => `
-                <tr>
-                    <td>${p.pid}</td>
-                    <td>${p.name}</td>
-                    <td>
-                        <button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">
-                            Завершить
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-;
+                    <tr>
+                        <td>${p.pid}</td>
+                        <td>${p.name}</td>
+                        <td>
+                            <button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">
+                                Завершить
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                ;
             } catch (e) { console.log("Ошибка обновления данных"); }
         }
         setInterval(refresh, 2000);
@@ -119,6 +122,18 @@
                 }
             } catch (e) { alert("Ошибка соединения с сервером."); }
         }
+        function changeTheme() {
+            // Если сейчас фон белый или не задан — делаем темным
+            if (document.body.style.backgroundColor === "" || document.body.style.backgroundColor === "white") {
+                document.body.style.backgroundColor = "#222"; // Темный фон
+                document.body.style.color = "white";         // Белый текст
+            } else {
+                // Иначе возвращаем как было
+                document.body.style.backgroundColor = "white";
+                document.body.style.color = "black";
+            }
+        }
+
     </script>
 </body>
 </html>
