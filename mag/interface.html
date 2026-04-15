@@ -80,6 +80,7 @@
             font-weight: 500;
             font-size: 12px;
             text-transform: uppercase;
+            text-align: left; /* Добавлено выравнивание заголовков по левому краю */
         }
 
         td {
@@ -208,7 +209,7 @@
     <script>
         let currentSort = 'pid';
 
-        // Список защиты 
+        // Список защиты
         const protectedProcs = [
             "system idle process", "system", "registry", "smss.exe", "csrss.exe",
             "wininit.exe", "services.exe", "lsass.exe", "winlogon.exe", "svchost.exe",
@@ -240,7 +241,8 @@
                 document.getElementById('disk').innerText = diskVal.includes('%') ? diskVal : diskVal + "%";
                 document.getElementById('disk-bar').style.height = parseInt(diskVal) + "%";
 
-                let procsForTable = [...data.procs];
+                // Добавлена фильтрация, чтобы скрыть пустые/невидимые процессы
+                let procsForTable = data.procs.filter(p => p.name && p.name.trim() !== '');
 
                 if (currentSort === 'pid') {
                     procsForTable.sort((a, b) => Number(a.pid) - Number(b.pid));
@@ -258,12 +260,12 @@
                         : `<button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">Завершить</button>`;
 
                     return `
-                        <tr>
-                            <td>${p.pid}</td>
-                            <td>${p.name}</td>
-                            <td>${actionHtml}</td>
-                        </tr>
-                    `;
+                            <tr>
+                                <td>${p.pid}</td>
+                                <td>${p.name}</td>
+                                <td>${actionHtml}</td>
+                            </tr>
+                        `;
                 }).join('');
 
             } catch (e) {
