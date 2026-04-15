@@ -8,89 +8,170 @@
     <title>System Monitor</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #fff;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #fdfdfd;
+            color: #333;
             padding: 40px;
-            transition: 0.3s; /* Чтобы тема менялась плавно */
+            transition: background-color 0.4s, color 0.4s;
         }
+
 
         .dashboard {
             display: flex;
-            border-left: 1px solid #ddd;
-            margin-bottom: 20px;
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
         .box {
-            padding: 0 20px;
-            border-right: 1px solid #ddd;
-            text-align: right;
-            min-width: 100px;
+            background: #fff;
+            padding: 20px 25px;
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
             display: flex;
             align-items: flex-end;
-            gap: 10px;
+            gap: 15px;
+            min-width: 140px;
+            border: 1px solid #f0f0f0;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
+            .box:hover {
+                transform: translateY(-3px); 
+                box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            }
 
         .bar-container {
-            width: 4px;
-            height: 40px;
+            width: 6px;
+            height: 50px;
             background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
             position: relative;
         }
 
         .bar-fill {
             width: 100%;
-            height: 0%; 
-            background: #0067c0; 
+            background: linear-gradient(to top, #0067c0, #00a2ed); 
             position: absolute;
             bottom: 0;
-            transition: height 0.5s;
+            transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
 
         .val {
-            font-size: 28px;
+            font-size: 32px;
             color: #0067c0;
-            display: block;
-            font-weight: 300;
+            font-weight: 600;
+            line-height: 1;
         }
 
         .label {
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0 8px; 
+            margin-top: 10px;
         }
 
-        th, td {
-            text-align: left;
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
+        th {
+            padding: 12px 15px;
+            color: #999;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
         }
+
+        td {
+            background: #fff;
+            padding: 12px 15px;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+            td:first-child {
+                border-left: 1px solid #f0f0f0;
+                border-radius: 8px 0 0 8px;
+            }
+
+            td:last-child {
+                border-right: 1px solid #f0f0f0;
+                border-radius: 0 8px 8px 0;
+            }
 
         .kill-btn {
-            background-color: #e81123;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 12px;
+            background: #fff;
+            color: #e81123;
+            border: 1px solid #e81123;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: 0.2s;
         }
 
             .kill-btn:hover {
-                background-color: #b00d1b;
+                background: #e81123;
+                color: #fff;
             }
-        tr td {
-            border-bottom: 1px solid #eee; /* Тонкая серая линия между задачами */
+        body.dark-theme {
+            background: #121212;
+            color: #eee;
         }
 
 
+            body.dark-theme .box,
+            body.dark-theme td {
+                background: #1e1e1e !important; 
+                color: #eee !important; 
+                border-color: #333;
+                box-shadow: none;
+            }
+
+            body.dark-theme .bar-container {
+                background: #333;
+            }
+
+            body.dark-theme .kill-btn {
+                background: transparent;
+                border-color: #e81123;
+            }
+
+        table {
+            table-layout: fixed;
+        }
+
+        th:nth-child(1), td:nth-child(1) {
+            width: 100px;
+        }
+
+        th:nth-child(2), td:nth-child(2) {
+            width: auto;
+        }
+
+        th:nth-child(3), td:nth-child(3) {
+            width: 150px;
+            text-align: right;
+        }
+
+
+
+        td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        body:not(.dark-theme) td {
+            color: #333;
+        }
+
     </style>
+
 </head>
 <body>
     <div class="dashboard">
@@ -200,16 +281,8 @@
             } catch (e) { alert("Ошибка соединения с сервером."); }
         }
         function changeTheme() {
-            let b = document.body;
-            if (b.style.backgroundColor === "" || b.style.backgroundColor === "white") {
-                b.style.backgroundColor = "#222";
-                b.style.color = "white";
-                document.querySelectorAll('td').forEach(td => td.style.borderBottom = "1px solid #444");
-            } else {
-                b.style.backgroundColor = "white";
-                b.style.color = "black";
-                document.querySelectorAll('td').forEach(td => td.style.borderBottom = "1px solid #eee");
-            }
+            // Просто добавляем или убираем класс dark-theme у всего документа
+            document.body.classList.toggle('dark-theme');
         }
         // Внутри refresh() после получения данных:
         document.getElementById('cpu').innerText = data.cpu + "%";
