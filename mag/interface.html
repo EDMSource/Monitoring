@@ -30,6 +30,7 @@
             gap: 10px;
         }
 
+
         .bar-container {
             width: 4px;
             height: 40px;
@@ -84,6 +85,11 @@
             .kill-btn:hover {
                 background-color: #b00d1b;
             }
+        tr td {
+            border-bottom: 1px solid #eee; /* Тонкая серая линия между задачами */
+        }
+
+
     </style>
 </head>
 <body>
@@ -108,51 +114,76 @@
             </div>
         </div>
         <div class="box">
-            <div class="bar-container">
-                <div id="disk-bar" class="bar-fill"></div>
-            </div>
+            <div class="bar-container"><div id="disk-bar" class="bar-fill"></div></div>
             <div>
                 <span class="val" id="disk">0%</span>
                 <span class="label">Диск</span>
             </div>
         </div>
+
+        <div class="box" onclick="changeTheme()" style="cursor: pointer; border: 1px solid #0067c0;">
+            <span class="val">🌓</span>
+            <span class="label">Тема</span>
+        </div>
+
     </div>
 
     <h3>Активные процессы</h3>
-    <button onclick="changeTheme()" style="margin-bottom: 10px; cursor: pointer;">
-        Сменить тему
-    </button>
     <table id="procTable">
-        <thead><tr><th>PID</th><th>Имя процесса</th><th>Действие</th></tr></thead>
+        <thead>
+            <tr>
+                <th onclick="setSort('pid')" style="cursor:pointer; color: #0067c0;">PID ↕</th>
+                <th onclick="setSort('name')" style="cursor:pointer; color: #0067c0;">Имя процесса ↕</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+
         <tbody></tbody>
     </table>
 
     <script>
+        let currentSort = 'pid'; 
+
+        function setSort(type) {
+            currentSort = type;
+            console.log("Сортировка изменена на:", type); 
+            refresh();
+        }
+
         async function refresh() {
             try {
-
                 const response = await fetch('http://localhost:5000/api/metrics');
                 const data = await response.json();
 
                 document.getElementById('cpu').innerText = data.cpu + "%";
-                document.getElementById('ram').innerText = data.ram + "%";
-                document.getElementById('disk').innerText = data.disk + "%";
                 document.getElementById('cpu-bar').style.height = data.cpu + "%";
+                document.getElementById('ram').innerText = data.ram + "%";
                 document.getElementById('ram-bar').style.height = data.ram + "%";
+                document.getElementById('disk').innerText = data.disk + "%";
                 document.getElementById('disk-bar').style.height = data.disk + "%";
 
+                let procsForTable = [...data.procs];
+
+                if (currentSort === 'pid') {
+                    procsForTable.sort((a, b) => Number(a.pid) - Number(b.pid));
+                } else {
+                    procsForTable.sort((a, b) => a.name.localeCompare(b.name));
+                }
 
                 const tbody = document.querySelector('#procTable tbody');
-                tbody.innerHTML = data.procs.slice(0, 200).map(p => `
-                <tr>
-                    <td>${p.pid}</td>
-                    <td>${p.name}</td>
-                    <td><button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">Завершить</button></td>
-                </tr>
-            `).join('');
+                tbody.innerHTML = procsForTable.slice(0, 150).map(p => `
+            <tr>
+                <td>${p.pid}</td>
+                <td>${p.name}</td>
+                <td><button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">Завершить</button></td>
+            </tr>
+        `).join('');
 
-            } catch (e) { console.log("Ошибка обновления данных"); }
+            } catch (e) {
+                console.error("Ошибка обновления:", e);
+            }
         }
+
         setInterval(refresh, 2000);
         async function killProcess(pid, name) {
             if (!confirm(`Вы точно хотите завершить процесс ${name} (PID: ${pid})?`)) return;
@@ -169,14 +200,15 @@
             } catch (e) { alert("Ошибка соединения с сервером."); }
         }
         function changeTheme() {
-            // Если сейчас фон белый или не задан - делаем темным
-            if (document.body.style.backgroundColor === "" || document.body.style.backgroundColor === "white") {
-                document.body.style.backgroundColor = "#222"; // Темный фон
-                document.body.style.color = "white";         // Белый текст
+            let b = document.body;
+            if (b.style.backgroundColor === "" || b.style.backgroundColor === "white") {
+                b.style.backgroundColor = "#222";
+                b.style.color = "white";
+                document.querySelectorAll('td').forEach(td => td.style.borderBottom = "1px solid #444");
             } else {
-                // Иначе возвращаем как было
-                document.body.style.backgroundColor = "white";
-                document.body.style.color = "black";
+                b.style.backgroundColor = "white";
+                b.style.color = "black";
+                document.querySelectorAll('td').forEach(td => td.style.borderBottom = "1px solid #eee");
             }
         }
         // Внутри refresh() после получения данных:
