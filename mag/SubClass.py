@@ -13,6 +13,7 @@ import os # для работы с путями и файловой систем
 import subprocess # Запуск внешних программ
 import json
 import signal
+import sys
 from flask import Flask, jsonify, request, send_from_directory # Создание веб сервака 
 
 
@@ -22,9 +23,14 @@ try:
 except (ImportError, AttributeError):
     kr = None
 
+def get_resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+
 # 26-27 нахождение пути к скрипту (в данном случаи нахождение monitor_agent.exe)
-project = os.path.dirname(os.path.abspath(__file__))
-monitor_path = os.path.join(project, "monitor_agent.exe")
+monitor_path = get_resource_path("monitor_agent.exe")
+html_path = get_resource_path("")
 
 
 app = Flask(__name__) # Создание и обработка входящих запросо HTML
@@ -73,7 +79,7 @@ def get_processes(): # Получение всех работающих проц
 
 @app.route('/') # Сигнал который вызывается если человек переходит по ссылке
 def index():
-    return send_from_directory(os.path.dirname(__file__), 'interface.html') #Ищем интерфейс и загружаем на сайт
+    return send_from_directory(html_path, 'interface.html') #Ищем интерфейс и загружаем на сайт
 
 @app.route('/api/metrics') #декоратор связывающий эту функцию с URL-адресом
 def metrics():
