@@ -1,87 +1,299 @@
-
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>System Monitor</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #fff;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #fdfdfd;
+            color: #333;
             padding: 40px;
+            transition: background-color 0.4s, color 0.4s;
         }
 
         .dashboard {
             display: flex;
-            border-left: 1px solid #ddd;
-            margin-bottom: 20px;
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
         .box {
-            padding: 0 20px;
-            border-right: 1px solid #ddd;
-            text-align: right;
-            min-width: 100px;
+            background: #fff;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            min-width: 140px;
+            border: 1px solid #f0f0f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .box:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            }
+
+        .bar-container {
+            width: 6px;
+            height: 50px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            width: 100%;
+            background: linear-gradient(to top, #0067c0, #00a2ed);
+            position: absolute;
+            bottom: 0;
+            transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .val {
-            font-size: 28px;
+            font-size: 32px;
             color: #0067c0;
-            display: block;
-            font-weight: 300;
+            font-weight: 600;
+            line-height: 1;
         }
 
         .label {
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin-top: 10px;
+            table-layout: fixed;
         }
 
-        th, td {
-            text-align: left;
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
+        th {
+            padding: 12px 15px;
+            color: #999;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            text-align: left; /* Добавлено выравнивание заголовков по левому краю */
+        }
+
+        td {
+            background: #fff;
+            padding: 12px 15px;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+            td:first-child {
+                border-left: 1px solid #f0f0f0;
+                border-radius: 8px 0 0 8px;
+            }
+
+            td:last-child {
+                border-right: 1px solid #f0f0f0;
+                border-radius: 0 8px 8px 0;
+            }
+
+            th:nth-child(1), td:nth-child(1) {
+                width: 100px;
+            }
+
+            th:nth-child(2), td:nth-child(2) {
+                width: auto;
+            }
+
+            th:nth-child(3), td:nth-child(3) {
+                width: 150px;
+                text-align: right;
+            }
+
+        .kill-btn {
+            background: #fff;
+            color: #e81123;
+            border: 1px solid #e81123;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+            .kill-btn:hover {
+                background: #e81123;
+                color: #fff;
+            }
+
+        body.dark-theme {
+            background: #121212;
+            color: #eee;
+        }
+
+            body.dark-theme .box,
+            body.dark-theme td {
+                background: #1e1e1e !important;
+                color: #eee !important;
+                border-color: #333;
+                box-shadow: none;
+            }
+
+            body.dark-theme .bar-container {
+                background: #333;
+            }
+
+            body.dark-theme .kill-btn {
+                background: transparent;
+                border-color: #e81123;
+            }
+
+        body:not(.dark-theme) td {
+            color: #333;
         }
     </style>
 </head>
 <body>
     <div class="dashboard">
-        <div class="box"><span class="val" id="cpu">0%</span><span class="label">ЦП</span></div>
-        <div class="box"><span class="val" id="ram">0%</span><span class="label">Память</span></div>
-        <div class="box"><span class="val" id="disk">0%</span><span class="label">Диск</span></div>
+        <div class="box">
+            <div class="bar-container">
+                <div id="cpu-bar" class="bar-fill"></div>
+            </div>
+            <div>
+                <span class="val" id="cpu">0%</span>
+                <span class="label">ЦП</span>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="bar-container">
+                <div id="ram-bar" class="bar-fill"></div>
+            </div>
+            <div>
+                <span class="val" id="ram">0%</span>
+                <span class="label">Память</span>
+            </div>
+        </div>
+        <div class="box">
+            <div class="bar-container"><div id="disk-bar" class="bar-fill"></div></div>
+            <div>
+                <span class="val" id="disk">0%</span>
+                <span class="label">Диск</span>
+            </div>
+        </div>
+
+        <div class="box" onclick="changeTheme()" style="cursor: pointer; border: 1px solid #0067c0;">
+            <span class="val">🌓</span>
+            <span class="label">Тема</span>
+        </div>
     </div>
 
     <h3>Активные процессы</h3>
     <table id="procTable">
-        <thead><tr><th>PID</th><th>Имя процесса</th></tr></thead>
+        <thead>
+            <tr>
+                <th onclick="setSort('pid')" style="cursor:pointer; color: #0067c0;">PID ↕</th>
+                <th onclick="setSort('name')" style="cursor:pointer; color: #0067c0;">Имя процесса ↕</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
         <tbody></tbody>
     </table>
 
     <script>
+        let currentSort = 'pid';
+
+        // Список защиты
+        const protectedProcs = [
+            "system idle process", "system", "registry", "smss.exe", "csrss.exe",
+            "wininit.exe", "services.exe", "lsass.exe", "winlogon.exe", "svchost.exe",
+            "dwm.exe", "explorer.exe", "fontdrvhost.exe", "spoolsv.exe", "taskhostw.exe",
+            "sihost.exe", "conhost.exe", "monitor_agent.exe"
+        ];
+
+        function setSort(type) {
+            currentSort = type;
+            refresh();
+        }
+
         async function refresh() {
             try {
-
                 const response = await fetch('http://localhost:5000/api/metrics');
                 const data = await response.json();
 
-                document.getElementById('cpu').innerText = data.cpu + "%";
-                document.getElementById('ram').innerText = data.ram + "%";
-                document.getElementById('disk').innerText = data.disk + "%";
+                // Если с сервера приходит "0%%" из-за бага Python, убираем лишний процент
+                const cpuVal = data.cpu.toString().replace('%%', '%');
+                const ramVal = data.ram.toString().replace('%%', '%');
+                const diskVal = data.disk.toString().replace('%%', '%');
+
+                document.getElementById('cpu').innerText = cpuVal.includes('%') ? cpuVal : cpuVal + "%";
+                document.getElementById('cpu-bar').style.height = parseInt(cpuVal) + "%";
+
+                document.getElementById('ram').innerText = ramVal.includes('%') ? ramVal : ramVal + "%";
+                document.getElementById('ram-bar').style.height = parseInt(ramVal) + "%";
+
+                document.getElementById('disk').innerText = diskVal.includes('%') ? diskVal : diskVal + "%";
+                document.getElementById('disk-bar').style.height = parseInt(diskVal) + "%";
+
+                // Добавлена фильтрация, чтобы скрыть пустые/невидимые процессы
+                let procsForTable = data.procs.filter(p => p.name && p.name.trim() !== '');
+
+                if (currentSort === 'pid') {
+                    procsForTable.sort((a, b) => Number(a.pid) - Number(b.pid));
+                } else {
+                    procsForTable.sort((a, b) => a.name.localeCompare(b.name));
+                }
 
                 const tbody = document.querySelector('#procTable tbody');
-                tbody.innerHTML = data.procs.slice(0, 30).map(p => `
-                    <tr><td>${p.pid}</td><td>${p.name}</td></tr>
-                `).join('');
-            } catch (e) { console.log("Ошибка обновления данных"); }
+                tbody.innerHTML = procsForTable.slice(0, 150).map(p => {
+                    // Проверка системный процесс или нет прямо в браузере
+                    const isSystem = protectedProcs.includes(p.name.toLowerCase()) || p.pid <= 4;
+
+                    const actionHtml = isSystem
+                        ? `<span style="color: #999; font-size: 13px; cursor: default;">🛡 Защищен</span>`
+                        : `<button class="kill-btn" onclick="killProcess(${p.pid}, '${p.name}')">Завершить</button>`;
+
+                    return `
+                            <tr>
+                                <td>${p.pid}</td>
+                                <td>${p.name}</td>
+                                <td>${actionHtml}</td>
+                            </tr>
+                        `;
+                }).join('');
+
+            } catch (e) {
+                console.error("Ошибка обновления:", e);
+            }
         }
+
+        async function killProcess(pid, name) {
+            if (!confirm(`Вы точно хотите завершить процесс ${name} (PID: ${pid})?`)) return;
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/kill/${pid}`, { method: 'POST' });
+                const result = await response.json();
+
+                if (result.status === 'ok') {
+                    refresh(); // обновляем таблицу сразу
+                } else {
+                    alert("Ошибка: " + result.message);
+                }
+            } catch (e) { alert("Ошибка соединения с сервером."); }
+        }
+
+        function changeTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        // Запускаем обновление данных при загрузке и каждые 2 секунды
+        refresh();
         setInterval(refresh, 2000);
     </script>
 </body>
